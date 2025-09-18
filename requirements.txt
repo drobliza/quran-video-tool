@@ -1,0 +1,4 @@
+tk
+pillow
+opencv-python
+numpy
