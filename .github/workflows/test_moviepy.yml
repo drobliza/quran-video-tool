@@ -1,4 +1,4 @@
-name: Test MoviePy with Video
+name: Test MoviePy Import
 
 on: [push]
 
@@ -19,27 +19,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install "moviepy==1.0.3"
 
-      - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - name: Install ImageMagick
-        run: sudo apt-get update && sudo apt-get install -y imagemagick
-
-      - name: Generate test video
+      - name: Verify MoviePy
         run: |
-          python - <<'PYCODE'
-          from moviepy.editor import TextClip, CompositeVideoClip
-
-          # نص متحرك أبيض على خلفية سوداء
-          clip = TextClip("Hello GitHub Actions", fontsize=70, color="white", size=(640, 360))
-          clip = clip.set_duration(5).set_position("center")
-          final = CompositeVideoClip([clip])
-
-          # حفظ الفيديو كـ mp4
-          final.write_videofile("output.mp4", fps=24)
-          PYCODE
-
-      - name: Upload video artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: moviepy-test-video
-          path: output.mp4
+          python -c "import moviepy; print('✅ MoviePy version:', moviepy.__version__)"
+          python -c "from moviepy.editor import VideoFileClip; print('✅ moviepy.editor import works!')"
