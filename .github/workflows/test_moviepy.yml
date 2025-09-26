@@ -1,6 +1,6 @@
 name: Test MoviePy
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   test-moviepy:
@@ -19,6 +19,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install moviepy
 
-      - name: Verify MoviePy import
+      - name: Test MoviePy import
         run: |
           python -c "from moviepy.editor import VideoFileClip; print('✅ MoviePy is working')"
