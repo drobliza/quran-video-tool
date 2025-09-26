@@ -20,14 +20,21 @@ steps:
       sudo apt-get update
       sudo apt-get install -y ffmpeg
       python -m pip install --upgrade pip
-      pip install moviepy==1.0.3
+      pip install moviepy
 
   - name: Verify MoviePy
     run: |
       python -c "import moviepy; print('✅ MoviePy version:', moviepy.__version__)"
       python -c "from moviepy.editor import VideoFileClip; print('✅ moviepy.editor import works!')"
 
-  - name: Run Quran Video Tool
+  - name: Run Quran Video Tool (only if inputs exist)
     run: |
-      python quran_video_tool.py --input1 inputs/video1 --input2 inputs/video2 --output outputs --per-bg 2 --compress
+      if [ -d "inputs/video1" ] && [ -d "inputs/video2" ] && \
+         [ "$(ls -A inputs/video1/*.mp4 2>/dev/null || true)" ] && \
+         [ "$(ls -A inputs/video2/*.mp4 2>/dev/null || true)" ]; then
+          echo "📹 Running Quran Video Tool..."
+          python quran_video_tool.py --input1 inputs/video1 --input2 inputs/video2 --output outputs --per-bg 2 --compress
+      else
+          echo "⚠️ No input videos found in inputs/video1 or inputs/video2. Skipping processing."
+      fi
 ```
