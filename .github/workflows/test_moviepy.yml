@@ -19,6 +19,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install moviepy
 
-      - name: Test MoviePy Import
+      - name: Verify MoviePy import
         run: |
           python -c "from moviepy.editor import VideoFileClip; print('✅ MoviePy is working')"
