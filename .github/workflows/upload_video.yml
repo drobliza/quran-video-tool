@@ -1,0 +1,52 @@
+name: Auto Video Upload
+
+on:
+  schedule:
+    # الأوقات بتوقيت UTC (نضيف -1 ساعة عن الجزائر UTC+1)
+    - cron: '0 11 * * *'   # 12:00 ظهراً بتوقيت الجزائر
+    - cron: '0 17 * * *'   # 18:00 مساءً بتوقيت الجزائر
+    - cron: '0 20 * * *'   # 21:00 مساءً بتوقيت الجزائر
+  workflow_dispatch:       # لتشغيله يدوياً من GitHub Actions أيضاً
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: ▶️ Run upload_video.py
+        id: run_script
+        run: |
+          echo "⏳ Running script..."
+          python upload_video.py > output.log 2>&1 || true
+
+      - name: 📤 Send Telegram notification
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          MESSAGE="✅ تم تنفيذ سكربت الرفع بنجاح في $(date '+%Y-%m-%d %H:%M') بتوقيت UTC.
+📁 المستودع: $GITHUB_REPOSITORY
+🔗 https://github.com/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}"
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d text="$MESSAGE" \
+            -d parse_mode="Markdown"
+
+      - name: 🧹 Clean up video files
+        run: |
+          echo "🧹 حذف الملفات الناتجة..."
+          rm -f ./*.mp4 ./*.avi ./*.mov || true
